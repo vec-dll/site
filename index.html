@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Нотатки, Завдання та Фото</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7fa;
+            color: #333;
+            animation: fadeInBody 1s ease-in-out;
+        }
+        @keyframes fadeInBody {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .auth-buttons button {
+            margin-left: 10px;
+            animation: buttonPulse 2s infinite;
+        }
+        @keyframes buttonPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        h1 {
+            text-align: center;
+            color: #4a90e2;
+            margin-bottom: 30px;
+            animation: slideInTitle 0.8s ease-out;
+        }
+        @keyframes slideInTitle {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            transition: background 0.3s, color 0.3s, transform 0.3s;
+        }
+        .tab-button:hover {
+            background: #f0f0f0;
+            transform: translateY(-3px);
+        }
+        .tab-button.active {
+            background: #4a90e2;
+            color: #fff;
+            border-bottom: none;
+        }
+        .tab-content {
+            display: none;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1.01);
+            animation: fadeInTab 0.5s;
+        }
+        @keyframes fadeInTab {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        input, textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus {
+            border-color: #4a90e2;
+        }
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background: #357abd;
+            transform: scale(1.05);
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+        li:hover {
+            transform: scale(1.02);
+            background: #e9e9e9;
+        }
+        .done {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .photo-item {
+            position: relative;
+            animation: photoFadeIn 0.6s ease-in;
+        }
+        @keyframes photoFadeIn {
+            from { opacity: 0; transform: rotate(-5deg); }
+            to { opacity: 1; transform: rotate(0); }
+        }
+        .photo {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .photo:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+        .uploader {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        #accessManagement {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        #allowedUsersList li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <header class="auth-buttons">
+        <button id="registerBtn">Реєстрація</button>
+        <button id="loginBtn">Вхід</button>
+        <button id="logoutBtn" style="display: none;">Вийти</button>
+    </header>
+    
+    <h1>Нотатки, Завдання та Фото</h1>
+    
+    <div class="tabs">
+        <div class="tab-button active" data-tab="notes">Нотатки</div>
+        <div class="tab-button" data-tab="tasks">Завдання</div>
+        <div class="tab-button" data-tab="photos">Фото</div>
+    </div>
+    
+    <div id="notes" class="tab-content active">
+        <h2>Нотатки</h2>
+        <textarea id="noteInput" placeholder="Введіть нотатку..."></textarea>
+        <button onclick="addNote()">Додати нотатку</button>
+        <ul id="notesList"></ul>
+    </div>
+    
+    <div id="tasks" class="tab-content">
+        <h2>Завдання</h2>
+        <input type="text" id="taskInput" placeholder="Введіть завдання...">
+        <button onclick="addTask()">Додати завдання</button>
+        <ul id="tasksList"></ul>
+    </div>
+    
+    <div id="photos" class="tab-content">
+        <h2>Фото</h2>
+        <input type="file" id="photoInput" accept="image/*" multiple>
+        <button onclick="uploadPhotos()">Завантажити фото</button>
+        <div id="photoGallery" class="photo-gallery"></div>
+        <div id="accessManagement" style="display: none;">
+            <h3>Керування доступом</h3>
+            <input type="text" id="accessLogin" placeholder="Логін користувача">
+            <button onclick="addAccess()">Додати доступ</button>
+            <ul id="allowedUsersList"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Локальне сховище для нотаток і завдань
+        function loadData(key, defaultValue = []) {
+            return JSON.parse(localStorage.getItem(key)) || defaultValue;
+        }
+
+        function saveData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        // Вкладки
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+                if (button.dataset.tab === 'photos') {
+                    renderPhotos();
+                }
+            });
+        });
+
+        // Нотатки
+        let notes = loadData('notes');
+
+        function renderNotes() {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+            notes.forEach((note, index) => {
+                const li = document.createElement('li');
+                li.textContent = note;
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Видалити';
+                deleteBtn.onclick = () => deleteNote(index);
+                li.appendChild(deleteBtn);
+                notesList.appendChild(li);
+            });
+        }
+
+        function addNote() {
+            const noteInput = document.getElementById('noteInput');
+            if (noteInput.value.trim()) {
+                notes.push(noteInput.value.trim());
+                saveData('notes', notes);
+                renderNotes();
+                noteInput.value = '';
+            }
+        }
+
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            saveData('notes', notes);
+            renderNotes();
+        }
+
+        renderNotes();
+
+        // Завдання
+        let tasks = loadData('tasks', []);
+
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.done;
+                checkbox.onchange = () => toggleTask(index);
+                li.appendChild(checkbox);
+                const span = document.createElement('span');
+                span.textContent = task.text;
+                if (task.done) span.classList.add('done');
+                li.appendChild(span);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Видалити';
+                deleteBtn.onclick = () => deleteTask(index);
+                li.appendChild(deleteBtn);
+                tasksList.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            if (taskInput.value.trim()) {
+                tasks.push({ text: taskInput.value.trim(), done: false });
+                saveData('tasks', tasks);
+                renderTasks();
+                taskInput.value = '';
+            }
+        }
+
+        function toggleTask(index) {
+            tasks[index].done = !tasks[index].done;
+            saveData('tasks', tasks);
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            saveData('tasks', tasks);
+            renderTasks();
+        }
+
+        renderTasks();
+
+        // Авторизація (через backend)
+        const registerBtn = document.getElementById('registerBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const accessManagement = document.getElementById('accessManagement');
+
+        // Функція для створення модального вікна
+        function createModal(title, fields, submitCallback) {
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.background = 'white';
+            modal.style.padding = '20px';
+            modal.style.border = '1px solid #ccc';
+            modal.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            modal.style.zIndex = 1000;
+
+            const h2 = document.createElement('h2');
+            h2.textContent = title;
+            modal.appendChild(h2);
+
+            const inputs = {};
+            fields.forEach(field => {
+                const input = document.createElement('input');
+                input.type = field.type;
+                input.placeholder = field.placeholder;
+                input.id = field.id;
+                modal.appendChild(input);
+                inputs[field.id] = input;
+            });
+
+            const submitBtn = document.createElement('button');
+            submitBtn.textContent = 'Підтвердити';
+            submitBtn.onclick = () => {
+                submitCallback(inputs);
+                document.body.removeChild(modal);
+            };
+            modal.appendChild(submitBtn);
+
+            document.body.appendChild(modal);
+        }
+
+        registerBtn.addEventListener('click', () => {
+            createModal('Реєстрація', [
+                { type: 'text', placeholder: 'Логін', id: 'regLogin' },
+                { type: 'password', placeholder: 'Пароль', id: 'regPassword' }
+            ], (inputs) => {
+                const login = inputs.regLogin.value;
+                const password = inputs.regPassword.value;
+                if (login && password) {
+                    fetch('http://localhost:3000/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ login, password })
+                    })
+                    .then(res => res.json())
+                    .then(data => alert(data.message))
+                    .catch(error => alert('Помилка: ' + error));
+                }
+            });
+        });
+
+        loginBtn.addEventListener('click', () => {
+            createModal('Вхід', [
+                { type: 'text', placeholder: 'Логін', id: 'logLogin' },
+                { type: 'password', placeholder: 'Пароль', id: 'logPassword' }
+            ], (inputs) => {
+                const login = inputs.logLogin.value;
+                const password = inputs.logPassword.value;
+                if (login && password) {
+                    fetch('http://localhost:3000/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ login, password })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.token) {
+                            localStorage.setItem('authToken', data.token);
+                            localStorage.setItem('userLogin', login);
+                            updateAuthUI();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => alert('Помилка: ' + error));
+                }
+            });
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userLogin');
+            updateAuthUI();
+        });
+
+        function updateAuthUI() {
+            const token = localStorage.getItem('authToken');
+            const userLogin = localStorage.getItem('userLogin');
+            if (token) {
+                registerBtn.style.display = 'none';
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+                if (userLogin === 'owner') { // Припустимо, власник має логін 'owner'
+                    accessManagement.style.display = 'block';
+                    renderAllowedUsers();
+                } else {
+                    accessManagement.style.display = 'none';
+                }
+                renderPhotos();
+            } else {
+                registerBtn.style.display = 'inline-block';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+                accessManagement.style.display = 'none';
+                document.getElementById('photoGallery').innerHTML = '<p>Увійдіть, щоб переглянути фото.</p>';
+            }
+        }
+
+        updateAuthUI(); // Ініціалізація UI
+
+        // Керування доступом
+        function addAccess() {
+            const accessLogin = document.getElementById('accessLogin').value;
+            if (!accessLogin) return;
+            const token = localStorage.getItem('authToken');
+            fetch('http://localhost:3000/add-access', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ accessLogin })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                renderAllowedUsers();
+                document.getElementById('accessLogin').value = '';
+            })
+            .catch(error => alert('Помилка: ' + error));
+        }
+
+        function removeAccess(login) {
+            const token = localStorage.getItem('authToken');
+            fetch('http://localhost:3000/remove-access', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ accessLogin: login })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                renderAllowedUsers();
+            })
+            .catch(error => alert('Помилка: ' + error));
+        }
+
+        function renderAllowedUsers() {
+            const allowedUsersList = document.getElementById('allowedUsersList');
+            allowedUsersList.innerHTML = '';
+            const token = localStorage.getItem('authToken');
+            fetch('http://localhost:3000/allowed-users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(users => {
+                users.forEach(login => {
+                    const li = document.createElement('li');
+                    li.textContent = login;
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Видалити';
+                    removeBtn.onclick = () => removeAccess(login);
+                    li.appendChild(removeBtn);
+                    allowedUsersList.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Помилка: ', error));
+        }
+
+        // Фото
+        function renderPhotos() {
+            const photoGallery = document.getElementById('photoGallery');
+            photoGallery.innerHTML = '';
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+
+            fetch('http://localhost:3000/photos', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(photos => {
+                if (photos.error) {
+                    photoGallery.innerHTML = '<p>' + photos.error + '</p>';
+                    return;
+                }
+                photos.forEach(photo => {
+                    const div = document.createElement('div');
+                    div.classList.add('photo-item');
+                    const img = document.createElement('img');
+                    img.src = photo.url;
+                    img.classList.add('photo');
+                    div.appendChild(img);
+                    const uploaderSpan = document.createElement('span');
+                    uploaderSpan.classList.add('uploader');
+                    uploaderSpan.textContent = `Відправник: ${photo.uploader}`;
+                    div.appendChild(uploaderSpan);
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Видалити';
+                    deleteBtn.onclick = () => deletePhoto(photo.filename);
+                    div.appendChild(deleteBtn);
+                    photoGallery.appendChild(div);
+                });
+            })
+            .catch(error => alert('Помилка: ' + error));
+        }
+
+        function uploadPhotos() {
+            const photoInput = document.getElementById('photoInput');
+            const files = photoInput.files;
+            const token = localStorage.getItem('authToken');
+            const formData = new FormData();
+            for (let file of files) {
+                formData.append('photos', file);
+            }
+            fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(() => {
+                renderPhotos();
+                photoInput.value = '';
+            })
+            .catch(error => alert('Помилка завантаження: ' + error));
+        }
+
+        function deletePhoto(filename) {
+            const token = localStorage.getItem('authToken');
+            fetch(`http://localhost:3000/photos/${filename}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(() => renderPhotos())
+            .catch(error => alert('Помилка видалення: ' + error));
+        }
+    </script>
+</body>
+</html>
