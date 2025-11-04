@@ -130,6 +130,10 @@
             background-color: #cc3700;
             transform: scale(1.05);
         }
+        .btn-primary {
+            background-color: #32cd32;
+            border-color: #32cd32;
+        }
         h1, h3 {
             color: #ffffff;
             text-shadow: 1px 1px 2px rgba(0,255,0,0.5);
@@ -143,6 +147,7 @@
             font-size: 0.8em;
             color: #90ee90;
             margin-left: 10px;
+            flex-grow: 1;
         }
         #photos-gallery {
             display: flex;
@@ -178,86 +183,92 @@
         .photo-item:hover .photo-delete {
             opacity: 1;
         }
-        #auth-form {
-            background: linear-gradient(to bottom, #006400, #228b22);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,255,0,0.3);
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            animation: authFade 1s;
-        }
-        @keyframes authFade {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .hidden {
-            display: none;
         }
     </style>
     <script src="https://unpkg.com/@octokit/rest@20.1.1/dist/octokit.rest.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <div id="auth-form">
-            <h2 class="text-center">Підключення до GitHub (для редагування)</h2>
-            <p>Введіть дані для завантаження/видалення фото. Без цього можна тільки переглядати. Репозиторій повинен бути публічним для загального доступу до фото.</p>
-            <div class="form-group">
-                <label for="owner">Власник репозиторію (username):</label>
-                <input type="text" class="form-control" id="owner" placeholder="yourusername">
-            </div>
-            <div class="form-group">
-                <label for="repo">Назва репозиторію:</label>
-                <input type="text" class="form-control" id="repo" placeholder="your-repo-name">
-            </div>
-            <div class="form-group">
-                <label for="token">GitHub Personal Access Token (для запису):</label>
-                <input type="password" class="form-control" id="token" placeholder="ghp_...">
-            </div>
-            <div class="form-group">
-                <label for="branch">Гілка (за замовчуванням main):</label>
-                <input type="text" class="form-control" id="branch" value="main">
-            </div>
-            <button class="btn btn-success btn-block" onclick="connectToGitHub()">Підключитися</button>
-            <button class="btn btn-secondary btn-block mt-2" onclick="skipAuth()">Пропустити (тільки перегляд)</button>
+        <div id="header">
+            <h1 class="mb-0">Завдання, Нотатки та Фото</h1>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#authModal" id="login-btn">Вхід в GitHub</button>
         </div>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="tasks-tab" data-toggle="tab" href="#tasks" role="tab">Завдання</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab">Нотатки</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="photos-tab" data-toggle="tab" href="#photos" role="tab">Фото</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="tasks" role="tabpanel">
+                <h3>Завдання</h3>
+                <ul class="list-group" id="tasks-list"></ul>
+                <div class="form-group mt-3">
+                    <input type="text" class="form-control" id="new-task" placeholder="Нове завдання">
+                    <button class="btn btn-success mt-2" onclick="addTask()">Додати</button>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="notes" role="tabpanel">
+                <h3>Нотатки</h3>
+                <ul class="list-group" id="notes-list"></ul>
+                <div class="form-group mt-3">
+                    <input type="text" class="form-control" id="new-note" placeholder="Нова нотатка">
+                    <button class="btn btn-success mt-2" onclick="addNote()">Додати</button>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="photos" role="tabpanel">
+                <h3>Фото</h3>
+                <div id="photos-gallery"></div>
+                <div class="form-group mt-3" id="upload-form" style="display: none;">
+                    <input type="file" class="form-control-file" id="new-photo" accept="image/*">
+                    <button class="btn btn-success mt-2" onclick="addPhoto()">Завантажити</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div id="main-content" class="hidden">
-            <h1 class="text-center mb-4">Завдання, Нотатки та Фото</h1>
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="tasks-tab" data-toggle="tab" href="#tasks" role="tab">Завдання</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab">Нотатки</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="photos-tab" data-toggle="tab" href="#photos" role="tab">Фото</a>
-                </li>
-            </ul>
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="tasks" role="tabpanel">
-                    <h3>Завдання</h3>
-                    <ul class="list-group" id="tasks-list"></ul>
-                    <div class="form-group mt-3">
-                        <input type="text" class="form-control" id="new-task" placeholder="Нове завдання">
-                        <button class="btn btn-success mt-2" onclick="addTask()">Додати</button>
+    <!-- Modal for GitHub Auth -->
+    <div class="modal fade" id="authModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="background: linear-gradient(to bottom, #006400, #228b22); color: #32cd32;">
+                <div class="modal-header">
+                    <h5 class="modal-title">Підключення до GitHub</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Введіть дані для перегляду/редагування фото. Репозиторій повинен бути публічним для загального доступу.</p>
+                    <div class="form-group">
+                        <label for="owner">Власник репозиторію (username):</label>
+                        <input type="text" class="form-control" id="owner" placeholder="yourusername">
+                    </div>
+                    <div class="form-group">
+                        <label for="repo">Назва репозиторію:</label>
+                        <input type="text" class="form-control" id="repo" placeholder="your-repo-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="token">GitHub Personal Access Token (для редагування):</label>
+                        <input type="password" class="form-control" id="token" placeholder="ghp_...">
+                    </div>
+                    <div class="form-group">
+                        <label for="branch">Гілка (за замовчуванням main):</label>
+                        <input type="text" class="form-control" id="branch" value="main">
                     </div>
                 </div>
-                <div class="tab-pane fade" id="notes" role="tabpanel">
-                    <h3>Нотатки</h3>
-                    <ul class="list-group" id="notes-list"></ul>
-                    <div class="form-group mt-3">
-                        <input type="text" class="form-control" id="new-note" placeholder="Нова нотатка">
-                        <button class="btn btn-success mt-2" onclick="addNote()">Додати</button>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="photos" role="tabpanel">
-                    <h3>Фото</h3>
-                    <div id="photos-gallery"></div>
-                    <div class="form-group mt-3" id="upload-form">
-                        <input type="file" class="form-control-file" id="new-photo" accept="image/*">
-                        <button class="btn btn-success mt-2" onclick="addPhoto()">Завантажити</button>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                    <button type="button" class="btn btn-success" onclick="connectToGitHub()">Підключитися</button>
                 </div>
             </div>
         </div>
@@ -267,11 +278,16 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        let owner, repo, token, branch, octokit;
+        let owner = localStorage.getItem('github_owner') || '';
+        let repo = localStorage.getItem('github_repo') || '';
+        let branch = localStorage.getItem('github_branch') || 'main';
+        let token = '';
+        let octokit;
         let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
         let photos = [];
         let isAuth = false;
+        let isRepoSet = !!owner && !!repo;
 
         function connectToGitHub() {
             owner = document.getElementById('owner').value;
@@ -284,43 +300,35 @@
                 return;
             }
 
+            localStorage.setItem('github_owner', owner);
+            localStorage.setItem('github_repo', repo);
+            localStorage.setItem('github_branch', branch);
+            isRepoSet = true;
+
             if (token) {
                 octokit = new Octokit({ auth: token });
                 isAuth = true;
+                document.getElementById('upload-form').style.display = 'block';
             } else {
                 isAuth = false;
+                document.getElementById('upload-form').style.display = 'none';
             }
 
-            document.getElementById('auth-form').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-
-            loadData();
-        }
-
-        function skipAuth() {
-            owner = prompt('Введіть власника репозиторію (username):');
-            repo = prompt('Введіть назву репозиторію:');
-            branch = prompt('Введіть гілку (за замовчуванням main):') || 'main';
-
-            if (!owner || !repo || !branch) {
-                alert('Заповніть поля!');
-                return;
-            }
-
-            isAuth = false;
-            document.getElementById('auth-form').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            document.getElementById('upload-form').classList.add('hidden'); // Ховаємо форму завантаження без auth
-
-            loadData();
+            $('#authModal').modal('hide');
+            loadPhotos();
         }
 
         async function loadData() {
-            // Завдання та нотатки з localStorage
             displayTasks();
             displayNotes();
+            if (isRepoSet) {
+                await loadPhotos();
+            } else {
+                document.getElementById('photos-gallery').innerHTML = '<p>Налаштуйте GitHub для перегляду фото (кнопка "Вхід в GitHub").</p>';
+            }
+        }
 
-            // Фото з GitHub
+        async function loadPhotos() {
             photos = await loadJson('data/photos.json') || { photos: [] };
             photos = photos.photos || [];
             displayPhotos();
@@ -351,6 +359,20 @@
             return `${seconds} секунд тому`;
         }
 
+        function formatDuration(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            let str = '';
+            if (days > 0) str += `${days} днів `;
+            if (hours % 24 > 0) str += `${hours % 24} годин `;
+            if (minutes % 60 > 0) str += `${minutes % 60} хвилин `;
+            if (seconds % 60 > 0) str += `${seconds % 60} секунд`;
+            return str.trim() || '0 секунд';
+        }
+
         function displayTasks() {
             const list = document.getElementById('tasks-list');
             list.innerHTML = '';
@@ -369,7 +391,12 @@
 
                 const timeSpan = document.createElement('span');
                 timeSpan.classList.add('task-time');
-                timeSpan.textContent = formatTimeAgo(task.created);
+                if (task.completed && task.completedTime) {
+                    const duration = task.completedTime - task.created;
+                    timeSpan.textContent = `Виконано за ${formatDuration(duration)}`;
+                } else {
+                    timeSpan.textContent = `Висять ${formatTimeAgo(task.created)}`;
+                }
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
@@ -426,19 +453,20 @@
                 deleteBtn.classList.add('photo-delete');
                 deleteBtn.textContent = 'X';
                 deleteBtn.onclick = () => removePhoto(index);
-                if (!isAuth) deleteBtn.style.display = 'none'; // Ховаємо delete без auth
+                if (!isAuth) deleteBtn.style.display = 'none';
 
                 div.appendChild(img);
                 div.appendChild(deleteBtn);
                 gallery.appendChild(div);
             });
+            document.getElementById('upload-form').style.display = isAuth ? 'block' : 'none';
         }
 
         function addTask() {
             const newTaskText = document.getElementById('new-task').value;
             if (!newTaskText) return;
 
-            const newTask = { text: newTaskText, created: Date.now(), completed: false };
+            const newTask = { text: newTaskText, created: Date.now(), completed: false, completedTime: null };
             tasks.push(newTask);
             localStorage.setItem('tasks', JSON.stringify(tasks));
             document.getElementById('new-task').value = '';
@@ -447,6 +475,11 @@
 
         function toggleTaskCompleted(index) {
             tasks[index].completed = !tasks[index].completed;
+            if (tasks[index].completed && !tasks[index].completedTime) {
+                tasks[index].completedTime = Date.now();
+            } else if (!tasks[index].completed) {
+                tasks[index].completedTime = null;
+            }
             localStorage.setItem('tasks', JSON.stringify(tasks));
             displayTasks();
         }
@@ -492,10 +525,8 @@
                 const filename = Date.now() + '_' + file.name.replace(/\s/g, '_');
                 const path = 'images/' + filename;
 
-                // Upload image
                 await uploadFile(path, base64, 'Upload new photo');
 
-                // Update photos.json
                 photos.push(filename);
                 await updateJson('data/photos.json', { photos });
 
@@ -513,7 +544,6 @@
             const filename = photos[index];
             const path = 'images/' + filename;
 
-            // Delete image
             const sha = await getFileSha(path);
             if (sha) {
                 await octokit.repos.deleteFile({
@@ -526,7 +556,6 @@
                 });
             }
 
-            // Update photos.json
             photos.splice(index, 1);
             await updateJson('data/photos.json', { photos });
 
@@ -577,6 +606,21 @@
                 throw e;
             }
         }
+
+        // Listen for tab shown event
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            if (e.target.id === 'photos-tab' && !isRepoSet) {
+                $('#authModal').modal('show');
+            }
+        });
+
+        // Load data on start
+        loadData();
+
+        // Pre-fill form with saved values
+        document.getElementById('owner').value = owner;
+        document.getElementById('repo').value = repo;
+        document.getElementById('branch').value = branch;
     </script>
 </body>
 </html>
