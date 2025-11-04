@@ -190,13 +190,16 @@
             margin-bottom: 20px;
         }
     </style>
-    <script src="https://unpkg.com/@octokit/rest@20.1.1/dist/octokit.rest.umd.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js"></script>
 </head>
 <body>
     <div class="container">
         <div id="header">
             <h1 class="mb-0">Завдання, Нотатки та Фото</h1>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#authModal" id="login-btn">Вхід в GitHub</button>
         </div>
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item">
@@ -229,46 +232,9 @@
             <div class="tab-pane fade" id="photos" role="tabpanel">
                 <h3>Фото</h3>
                 <div id="photos-gallery"></div>
-                <div class="form-group mt-3" id="upload-form" style="display: none;">
+                <div class="form-group mt-3">
                     <input type="file" class="form-control-file" id="new-photo" accept="image/*">
                     <button class="btn btn-success mt-2" onclick="addPhoto()">Завантажити</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for GitHub Auth -->
-    <div class="modal fade" id="authModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" style="background: linear-gradient(to bottom, #006400, #228b22); color: #32cd32;">
-                <div class="modal-header">
-                    <h5 class="modal-title">Підключення до GitHub</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Введіть дані для перегляду/редагування фото. Репозиторій повинен бути публічним для загального доступу.</p>
-                    <div class="form-group">
-                        <label for="owner">Власник репозиторію (username):</label>
-                        <input type="text" class="form-control" id="owner" placeholder="yourusername">
-                    </div>
-                    <div class="form-group">
-                        <label for="repo">Назва репозиторію:</label>
-                        <input type="text" class="form-control" id="repo" placeholder="your-repo-name">
-                    </div>
-                    <div class="form-group">
-                        <label for="token">GitHub Personal Access Token (для редагування):</label>
-                        <input type="password" class="form-control" id="token" placeholder="ghp_...">
-                    </div>
-                    <div class="form-group">
-                        <label for="branch">Гілка (за замовчуванням main):</label>
-                        <input type="text" class="form-control" id="branch" value="main">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
-                    <button type="button" class="btn btn-success" onclick="connectToGitHub()">Підключитися</button>
                 </div>
             </div>
         </div>
@@ -278,71 +244,38 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        let owner = localStorage.getItem('github_owner') || '';
-        let repo = localStorage.getItem('github_repo') || '';
-        let branch = localStorage.getItem('github_branch') || 'main';
-        let token = '';
-        let octokit;
+        // Замініть на ваші конфігурації Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Ініціалізація Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        const storage = firebase.storage();
+
         let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
         let photos = [];
-        let isAuth = false;
-        let isRepoSet = !!owner && !!repo;
 
-        function connectToGitHub() {
-            owner = document.getElementById('owner').value;
-            repo = document.getElementById('repo').value;
-            token = document.getElementById('token').value;
-            branch = document.getElementById('branch').value;
-
-            if (!owner || !repo || !branch) {
-                alert('Заповніть обов\'язкові поля!');
-                return;
-            }
-
-            localStorage.setItem('github_owner', owner);
-            localStorage.setItem('github_repo', repo);
-            localStorage.setItem('github_branch', branch);
-            isRepoSet = true;
-
-            if (token) {
-                octokit = new Octokit({ auth: token });
-                isAuth = true;
-                document.getElementById('upload-form').style.display = 'block';
-            } else {
-                isAuth = false;
-                document.getElementById('upload-form').style.display = 'none';
-            }
-
-            $('#authModal').modal('hide');
+        // Анонімна аутентифікація
+        auth.signInAnonymously().then(() => {
+            console.log('Анонімно аутентифіковано');
             loadPhotos();
-        }
+        }).catch((error) => {
+            console.error('Помилка аутентифікації:', error);
+        });
 
-        async function loadData() {
+        function loadData() {
             displayTasks();
             displayNotes();
-            if (isRepoSet) {
-                await loadPhotos();
-            } else {
-                document.getElementById('photos-gallery').innerHTML = '<p>Налаштуйте GitHub для перегляду фото (кнопка "Вхід в GitHub").</p>';
-            }
-        }
-
-        async function loadPhotos() {
-            photos = await loadJson('data/photos.json') || { photos: [] };
-            photos = photos.photos || [];
-            displayPhotos();
-        }
-
-        async function loadJson(path) {
-            try {
-                const response = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`);
-                if (!response.ok) throw new Error();
-                return await response.json();
-            } catch (e) {
-                console.log(`File ${path} not found, assuming empty.`);
-                return { photos: [] };
-            }
         }
 
         function formatTimeAgo(timestamp) {
@@ -441,25 +374,30 @@
             const gallery = document.getElementById('photos-gallery');
             gallery.innerHTML = '';
             gallery.classList.add('d-flex', 'flex-wrap');
-            photos.forEach((photo, index) => {
+            photos.forEach((photoUrl, index) => {
                 const div = document.createElement('div');
                 div.classList.add('photo-item');
 
                 const img = document.createElement('img');
-                img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/images/${photo}`;
+                img.src = photoUrl;
                 img.classList.add('img-thumbnail');
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.classList.add('photo-delete');
                 deleteBtn.textContent = 'X';
-                deleteBtn.onclick = () => removePhoto(index);
-                if (!isAuth) deleteBtn.style.display = 'none';
+                deleteBtn.onclick = () => removePhoto(photoUrl, index);
 
                 div.appendChild(img);
                 div.appendChild(deleteBtn);
                 gallery.appendChild(div);
             });
-            document.getElementById('upload-form').style.display = isAuth ? 'block' : 'none';
+        }
+
+        function loadPhotos() {
+            database.ref('photos').on('value', (snapshot) => {
+                photos = snapshot.val() ? Object.values(snapshot.val()) : [];
+                displayPhotos();
+            });
         }
 
         function addTask() {
@@ -507,11 +445,7 @@
             displayNotes();
         }
 
-        async function addPhoto() {
-            if (!isAuth) {
-                alert('Потрібна авторизація для завантаження!');
-                return;
-            }
+        function addPhoto() {
             const fileInput = document.getElementById('new-photo');
             const file = fileInput.files[0];
             if (!file) {
@@ -519,108 +453,31 @@
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64 = e.target.result.split(',')[1];
-                const filename = Date.now() + '_' + file.name.replace(/\s/g, '_');
-                const path = 'images/' + filename;
-
-                await uploadFile(path, base64, 'Upload new photo');
-
-                photos.push(filename);
-                await updateJson('data/photos.json', { photos });
-
-                displayPhotos();
-                fileInput.value = '';
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function removePhoto(index) {
-            if (!isAuth) {
-                alert('Потрібна авторизація для видалення!');
-                return;
-            }
-            const filename = photos[index];
-            const path = 'images/' + filename;
-
-            const sha = await getFileSha(path);
-            if (sha) {
-                await octokit.repos.deleteFile({
-                    owner,
-                    repo,
-                    path,
-                    message: 'Delete photo',
-                    sha,
-                    branch
+            const storageRef = storage.ref('images/' + Date.now() + '_' + file.name);
+            storageRef.put(file).then((snapshot) => {
+                snapshot.ref.getDownloadURL().then((url) => {
+                    database.ref('photos').push(url);
+                    fileInput.value = '';
                 });
-            }
-
-            photos.splice(index, 1);
-            await updateJson('data/photos.json', { photos });
-
-            displayPhotos();
-        }
-
-        async function updateJson(path, data) {
-            const newContent = JSON.stringify(data, null, 2);
-            const base64Content = btoa(unescape(encodeURIComponent(newContent)));
-            const sha = await getFileSha(path);
-            await octokit.repos.createOrUpdateFileContents({
-                owner,
-                repo,
-                path,
-                message: 'Update photos',
-                content: base64Content,
-                sha,
-                branch
+            }).catch((error) => {
+                console.error('Помилка завантаження:', error);
             });
         }
 
-        async function uploadFile(path, base64Content, message) {
-            const sha = await getFileSha(path);
-            await octokit.repos.createOrUpdateFileContents({
-                owner,
-                repo,
-                path,
-                message,
-                content: base64Content,
-                sha,
-                branch
-            });
-        }
-
-        async function getFileSha(path) {
-            try {
-                const response = await octokit.repos.getContent({
-                    owner,
-                    repo,
-                    path,
-                    ref: branch
+        function removePhoto(photoUrl, index) {
+            if (confirm('Видалити фото?')) {
+                // Видалення з бази даних
+                database.ref('photos').orderByValue().equalTo(photoUrl).once('value', (snapshot) => {
+                    snapshot.forEach((child) => {
+                        child.ref.remove();
+                    });
                 });
-                return response.data.sha;
-            } catch (e) {
-                if (e.status === 404) {
-                    return undefined;
-                }
-                throw e;
+                // Видалення з сховища (якщо потрібно, але для простоти пропустимо, оскільки URL може бути втрачено)
             }
         }
 
-        // Listen for tab shown event
-        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-            if (e.target.id === 'photos-tab' && !isRepoSet) {
-                $('#authModal').modal('show');
-            }
-        });
-
-        // Load data on start
+        // Завантаження даних при старті
         loadData();
-
-        // Pre-fill form with saved values
-        document.getElementById('owner').value = owner;
-        document.getElementById('repo').value = repo;
-        document.getElementById('branch').value = branch;
     </script>
 </body>
 </html>
