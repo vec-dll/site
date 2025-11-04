@@ -7,108 +7,117 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #2c3e50; /* Темно-синій фон */
+            color: #ecf0f1; /* Світлий текст */
         }
         .container {
             margin-top: 50px;
         }
+        .nav-tabs .nav-link {
+            color: #ecf0f1;
+            border-color: #34495e;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #34495e;
+            border-color: #34495e #34495e #34495e;
+            color: #ffffff;
+        }
         .tab-content {
             padding: 20px;
-            background-color: white;
-            border: 1px solid #dee2e6;
+            background-color: #34495e; /* Темніший фон для контенту */
+            border: 1px solid #2c3e50;
             border-top: none;
-            border-radius: 0 0 4px 4px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .list-group-item {
-            transition: opacity 0.5s ease-in-out;
+            background-color: #4a6785; /* Колір елементів списку */
+            color: #ecf0f1;
+            border-color: #2c3e50;
+            transition: transform 0.3s ease, opacity 0.5s ease-in-out;
+        }
+        .list-group-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .fade-in {
             opacity: 0;
+            transform: translateY(20px);
         }
         .fade-in.active {
             opacity: 1;
+            transform: translateY(0);
         }
         .img-thumbnail {
             max-width: 200px;
             margin: 10px;
-            transition: transform 0.3s ease;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .img-thumbnail:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
-        #auth-form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        .form-control {
+            background-color: #4a6785;
+            color: #ecf0f1;
+            border-color: #2c3e50;
         }
-        .hidden {
-            display: none;
+        .form-control::placeholder {
+            color: #bdc3c7;
+        }
+        .btn-success {
+            background-color: #27ae60;
+            border-color: #27ae60;
+            transition: background-color 0.3s ease;
+        }
+        .btn-success:hover {
+            background-color: #219d52;
+        }
+        h1, h3 {
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
     </style>
-    <script src="https://unpkg.com/@octokit/rest@20.1.1/dist/octokit.rest.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <div id="auth-form">
-            <h2 class="text-center">Підключення до GitHub</h2>
-            <p>Введіть дані для доступу до репозиторію. Токен повинен мати права на читання/запис контенту (scopes: repo або public_repo).</p>
-            <div class="form-group">
-                <label for="owner">Власник репозиторію (username):</label>
-                <input type="text" class="form-control" id="owner" placeholder="yourusername">
-            </div>
-            <div class="form-group">
-                <label for="repo">Назва репозиторію:</label>
-                <input type="text" class="form-control" id="repo" placeholder="your-repo-name">
-            </div>
-            <div class="form-group">
-                <label for="token">GitHub Personal Access Token:</label>
-                <input type="password" class="form-control" id="token" placeholder="ghp_...">
-            </div>
-            <div class="form-group">
-                <label for="branch">Гілка (за замовчуванням main):</label>
-                <input type="text" class="form-control" id="branch" value="main">
-            </div>
-            <button class="btn btn-primary btn-block" onclick="connectToGitHub()">Підключитися</button>
-        </div>
-
-        <div id="main-content" class="hidden">
-            <h1 class="text-center mb-4">Завдання, Нотатки та Фото</h1>
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="tasks-tab" data-toggle="tab" href="#tasks" role="tab">Завдання</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab">Нотатки</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="photos-tab" data-toggle="tab" href="#photos" role="tab">Фото</a>
-                </li>
-            </ul>
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="tasks" role="tabpanel">
-                    <h3>Завдання</h3>
-                    <ul class="list-group" id="tasks-list"></ul>
-                    <div class="form-group mt-3">
-                        <input type="text" class="form-control" id="new-task" placeholder="Нове завдання">
-                        <button class="btn btn-success mt-2" onclick="addTask()">Додати</button>
-                    </div>
+        <h1 class="text-center mb-4">Завдання, Нотатки та Фото</h1>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="tasks-tab" data-toggle="tab" href="#tasks" role="tab">Завдання</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab">Нотатки</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="photos-tab" data-toggle="tab" href="#photos" role="tab">Фото</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="tasks" role="tabpanel">
+                <h3>Завдання</h3>
+                <ul class="list-group" id="tasks-list"></ul>
+                <div class="form-group mt-3">
+                    <input type="text" class="form-control" id="new-task" placeholder="Нове завдання">
+                    <button class="btn btn-success mt-2" onclick="addTask()">Додати</button>
                 </div>
-                <div class="tab-pane fade" id="notes" role="tabpanel">
-                    <h3>Нотатки</h3>
-                    <ul class="list-group" id="notes-list"></ul>
-                    <div class="form-group mt-3">
-                        <input type="text" class="form-control" id="new-note" placeholder="Нова нотатка">
-                        <button class="btn btn-success mt-2" onclick="addNote()">Додати</button>
-                    </div>
+            </div>
+            <div class="tab-pane fade" id="notes" role="tabpanel">
+                <h3>Нотатки</h3>
+                <ul class="list-group" id="notes-list"></ul>
+                <div class="form-group mt-3">
+                    <input type="text" class="form-control" id="new-note" placeholder="Нова нотатка">
+                    <button class="btn btn-success mt-2" onclick="addNote()">Додати</button>
                 </div>
-                <div class="tab-pane fade" id="photos" role="tabpanel">
-                    <h3>Фото</h3>
-                    <div id="photos-gallery" class="d-flex flex-wrap"></div>
-                    <div class="form-group mt-3">
-                        <input type="file" class="form-control-file" id="new-photo" accept="image/*">
-                        <button class="btn btn-success mt-2" onclick="addPhoto()">Завантажити</button>
-                    </div>
+            </div>
+            <div class="tab-pane fade" id="photos" role="tabpanel">
+                <h3>Фото</h3>
+                <div id="photos-gallery" class="d-flex flex-wrap"></div>
+                <div class="form-group mt-3">
+                    <input type="file" class="form-control-file" id="new-photo" accept="image/*">
+                    <button class="btn btn-success mt-2" onclick="addPhoto()">Завантажити</button>
                 </div>
             </div>
         </div>
@@ -118,51 +127,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        let owner, repo, token, branch, octokit;
-        let tasks = [], notes = [], photos = [];
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        let photos = JSON.parse(localStorage.getItem('photos')) || []; // Масив base64 строк для фото
 
-        function connectToGitHub() {
-            owner = document.getElementById('owner').value;
-            repo = document.getElementById('repo').value;
-            token = document.getElementById('token').value;
-            branch = document.getElementById('branch').value;
-
-            if (!owner || !repo || !token || !branch) {
-                alert('Заповніть всі поля!');
-                return;
-            }
-
-            octokit = new Octokit({ auth: token });
-
-            document.getElementById('auth-form').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-
-            loadData();
-        }
-
-        async function loadData() {
-            tasks = await loadJson('data/tasks.json') || { tasks: [] };
-            tasks = tasks.tasks || [];
+        function loadData() {
             displayTasks();
-
-            notes = await loadJson('data/notes.json') || { notes: [] };
-            notes = notes.notes || [];
             displayNotes();
-
-            photos = await loadJson('data/photos.json') || { photos: [] };
-            photos = photos.photos || [];
             displayPhotos();
-        }
-
-        async function loadJson(path) {
-            try {
-                const response = await fetch(path);
-                if (!response.ok) throw new Error();
-                return await response.json();
-            } catch (e) {
-                console.log(`File ${path} not found, assuming empty.`);
-                return { items: [] };
-            }
         }
 
         function displayTasks() {
@@ -170,9 +142,10 @@
             list.innerHTML = '';
             tasks.forEach(task => {
                 const li = document.createElement('li');
-                li.classList.add('list-group-item');
+                li.classList.add('list-group-item', 'fade-in');
                 li.textContent = task;
                 list.appendChild(li);
+                setTimeout(() => li.classList.add('active'), 10);
             });
         }
 
@@ -181,29 +154,31 @@
             list.innerHTML = '';
             notes.forEach(note => {
                 const li = document.createElement('li');
-                li.classList.add('list-group-item');
+                li.classList.add('list-group-item', 'fade-in');
                 li.textContent = note;
                 list.appendChild(li);
+                setTimeout(() => li.classList.add('active'), 10);
             });
         }
 
         function displayPhotos() {
             const gallery = document.getElementById('photos-gallery');
             gallery.innerHTML = '';
-            photos.forEach(photo => {
+            photos.forEach(photoBase64 => {
                 const img = document.createElement('img');
-                img.src = `images/${photo}`;
-                img.classList.add('img-thumbnail');
+                img.src = photoBase64;
+                img.classList.add('img-thumbnail', 'fade-in');
                 gallery.appendChild(img);
+                setTimeout(() => img.classList.add('active'), 10);
             });
         }
 
-        async function addTask() {
+        function addTask() {
             const newTask = document.getElementById('new-task').value;
             if (!newTask) return;
 
             tasks.push(newTask);
-            await updateJson('data/tasks.json', { tasks });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
             document.getElementById('new-task').value = '';
 
             const list = document.getElementById('tasks-list');
@@ -214,12 +189,12 @@
             setTimeout(() => li.classList.add('active'), 10);
         }
 
-        async function addNote() {
+        function addNote() {
             const newNote = document.getElementById('new-note').value;
             if (!newNote) return;
 
             notes.push(newNote);
-            await updateJson('data/notes.json', { notes });
+            localStorage.setItem('notes', JSON.stringify(notes));
             document.getElementById('new-note').value = '';
 
             const list = document.getElementById('notes-list');
@@ -230,28 +205,20 @@
             setTimeout(() => li.classList.add('active'), 10);
         }
 
-        async function addPhoto() {
+        function addPhoto() {
             const fileInput = document.getElementById('new-photo');
             const file = fileInput.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64 = e.target.result.split(',')[1];
-                const filename = Date.now() + '_' + file.name.replace(/\s/g, '_');
-                const path = 'images/' + filename;
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                photos.push(base64);
+                localStorage.setItem('photos', JSON.stringify(photos));
 
-                // Upload image
-                await uploadFile(path, base64, 'Upload new photo');
-
-                // Update photos.json
-                photos.push(filename);
-                await updateJson('data/photos.json', { photos });
-
-                // Display new photo with animation
                 const gallery = document.getElementById('photos-gallery');
                 const img = document.createElement('img');
-                img.src = `images/${filename}`;
+                img.src = base64;
                 img.classList.add('img-thumbnail', 'fade-in');
                 gallery.appendChild(img);
                 setTimeout(() => img.classList.add('active'), 10);
@@ -261,50 +228,8 @@
             reader.readAsDataURL(file);
         }
 
-        async function updateJson(path, data) {
-            const newContent = JSON.stringify(data, null, 2);
-            const base64Content = btoa(unescape(encodeURIComponent(newContent)));
-            const sha = await getFileSha(path);
-            await octokit.repos.createOrUpdateFileContents({
-                owner,
-                repo,
-                path,
-                message: 'Update data',
-                content: base64Content,
-                sha,
-                branch
-            });
-        }
-
-        async function uploadFile(path, base64Content, message) {
-            const sha = await getFileSha(path);
-            await octokit.repos.createOrUpdateFileContents({
-                owner,
-                repo,
-                path,
-                message,
-                content: base64Content,
-                sha,
-                branch
-            });
-        }
-
-        async function getFileSha(path) {
-            try {
-                const response = await octokit.repos.getContent({
-                    owner,
-                    repo,
-                    path,
-                    branch
-                });
-                return response.data.sha;
-            } catch (e) {
-                if (e.status === 404) {
-                    return undefined;
-                }
-                throw e;
-            }
-        }
+        // Завантаження даних при старті
+        loadData();
     </script>
 </body>
 </html>
