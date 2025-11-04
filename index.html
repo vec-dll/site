@@ -7,38 +7,45 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #2c3e50; /* Темно-синій фон */
-            color: #ecf0f1; /* Світлий текст */
+            background-color: #0a1f0a; /* Темно-зелений фон */
+            color: #32cd32; /* Кислотно-зелений текст (lime green) */
         }
         .container {
             margin-top: 50px;
         }
         .nav-tabs .nav-link {
-            color: #ecf0f1;
-            border-color: #34495e;
+            color: #32cd32;
+            border-color: #006400;
         }
         .nav-tabs .nav-link.active {
-            background-color: #34495e;
-            border-color: #34495e #34495e #34495e;
+            background-color: #006400;
+            border-color: #006400 #006400 #006400;
             color: #ffffff;
         }
         .tab-content {
             padding: 20px;
-            background-color: #34495e; /* Темніший фон для контенту */
-            border: 1px solid #2c3e50;
+            background-color: #006400; /* Темніший зелений для контенту */
+            border: 1px solid #0a1f0a;
             border-top: none;
             border-radius: 0 0 8px 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,255,0,0.2);
         }
         .list-group-item {
-            background-color: #4a6785; /* Колір елементів списку */
-            color: #ecf0f1;
-            border-color: #2c3e50;
+            background-color: #228b22; /* Зелений колір елементів списку */
+            color: #32cd32;
+            border-color: #0a1f0a;
             transition: transform 0.3s ease, opacity 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
         .list-group-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,255,0,0.1);
+        }
+        .list-group-item.completed {
+            text-decoration: line-through;
+            opacity: 0.7;
         }
         .fade-in {
             opacity: 0;
@@ -51,33 +58,42 @@
         .img-thumbnail {
             max-width: 200px;
             margin: 10px;
-            border: 2px solid #ecf0f1;
+            border: 2px solid #32cd32;
             border-radius: 8px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .img-thumbnail:hover {
             transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,255,0,0.3);
         }
         .form-control {
-            background-color: #4a6785;
-            color: #ecf0f1;
-            border-color: #2c3e50;
+            background-color: #228b22;
+            color: #32cd32;
+            border-color: #0a1f0a;
         }
         .form-control::placeholder {
-            color: #bdc3c7;
+            color: #90ee90;
         }
         .btn-success {
-            background-color: #27ae60;
-            border-color: #27ae60;
+            background-color: #32cd32;
+            border-color: #32cd32;
             transition: background-color 0.3s ease;
         }
         .btn-success:hover {
-            background-color: #219d52;
+            background-color: #228b22;
+        }
+        .btn-danger {
+            background-color: #ff4500; /* Червоний для видалення, щоб контрастував */
+            border-color: #ff4500;
         }
         h1, h3 {
             color: #ffffff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(0,255,0,0.5);
+        }
+        .task-time {
+            font-size: 0.8em;
+            color: #90ee90;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -129,7 +145,7 @@
     <script>
         let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
-        let photos = JSON.parse(localStorage.getItem('photos')) || []; // Масив base64 строк для фото
+        let photos = JSON.parse(localStorage.getItem('photos')) || [];
 
         function loadData() {
             displayTasks();
@@ -137,13 +153,49 @@
             displayPhotos();
         }
 
+        function formatTimeAgo(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `${days} днів тому`;
+            if (hours > 0) return `${hours} годин тому`;
+            if (minutes > 0) return `${minutes} хвилин тому`;
+            return `${seconds} секунд тому`;
+        }
+
         function displayTasks() {
             const list = document.getElementById('tasks-list');
             list.innerHTML = '';
-            tasks.forEach(task => {
+            tasks.forEach((task, index) => {
                 const li = document.createElement('li');
                 li.classList.add('list-group-item', 'fade-in');
-                li.textContent = task;
+                if (task.completed) li.classList.add('completed');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.completed;
+                checkbox.onchange = () => toggleTaskCompleted(index);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = task.text;
+
+                const timeSpan = document.createElement('span');
+                timeSpan.classList.add('task-time');
+                timeSpan.textContent = formatTimeAgo(task.created);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+                deleteBtn.textContent = 'Видалити';
+                deleteBtn.onclick = () => removeTask(index);
+
+                li.appendChild(checkbox);
+                li.appendChild(textSpan);
+                li.appendChild(timeSpan);
+                li.appendChild(deleteBtn);
                 list.appendChild(li);
                 setTimeout(() => li.classList.add('active'), 10);
             });
@@ -152,10 +204,25 @@
         function displayNotes() {
             const list = document.getElementById('notes-list');
             list.innerHTML = '';
-            notes.forEach(note => {
+            notes.forEach((note, index) => {
                 const li = document.createElement('li');
                 li.classList.add('list-group-item', 'fade-in');
-                li.textContent = note;
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = note.text;
+
+                const timeSpan = document.createElement('span');
+                timeSpan.classList.add('task-time');
+                timeSpan.textContent = formatTimeAgo(note.created);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+                deleteBtn.textContent = 'Видалити';
+                deleteBtn.onclick = () => removeNote(index);
+
+                li.appendChild(textSpan);
+                li.appendChild(timeSpan);
+                li.appendChild(deleteBtn);
                 list.appendChild(li);
                 setTimeout(() => li.classList.add('active'), 10);
             });
@@ -174,41 +241,52 @@
         }
 
         function addTask() {
-            const newTask = document.getElementById('new-task').value;
-            if (!newTask) return;
+            const newTaskText = document.getElementById('new-task').value;
+            if (!newTaskText) return;
 
+            const newTask = { text: newTaskText, created: Date.now(), completed: false };
             tasks.push(newTask);
             localStorage.setItem('tasks', JSON.stringify(tasks));
             document.getElementById('new-task').value = '';
+            displayTasks();
+        }
 
-            const list = document.getElementById('tasks-list');
-            const li = document.createElement('li');
-            li.classList.add('list-group-item', 'fade-in');
-            li.textContent = newTask;
-            list.appendChild(li);
-            setTimeout(() => li.classList.add('active'), 10);
+        function toggleTaskCompleted(index) {
+            tasks[index].completed = !tasks[index].completed;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            displayTasks();
+        }
+
+        function removeTask(index) {
+            tasks.splice(index, 1);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            displayTasks();
         }
 
         function addNote() {
-            const newNote = document.getElementById('new-note').value;
-            if (!newNote) return;
+            const newNoteText = document.getElementById('new-note').value;
+            if (!newNoteText) return;
 
+            const newNote = { text: newNoteText, created: Date.now() };
             notes.push(newNote);
             localStorage.setItem('notes', JSON.stringify(notes));
             document.getElementById('new-note').value = '';
+            displayNotes();
+        }
 
-            const list = document.getElementById('notes-list');
-            const li = document.createElement('li');
-            li.classList.add('list-group-item', 'fade-in');
-            li.textContent = newNote;
-            list.appendChild(li);
-            setTimeout(() => li.classList.add('active'), 10);
+        function removeNote(index) {
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            displayNotes();
         }
 
         function addPhoto() {
             const fileInput = document.getElementById('new-photo');
             const file = fileInput.files[0];
-            if (!file) return;
+            if (!file) {
+                alert('Спочатку оберіть фото!');
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -224,6 +302,9 @@
                 setTimeout(() => img.classList.add('active'), 10);
 
                 fileInput.value = '';
+            };
+            reader.onerror = function() {
+                alert('Помилка читання файлу!');
             };
             reader.readAsDataURL(file);
         }
