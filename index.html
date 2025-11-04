@@ -7,41 +7,68 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #0a1f0a; /* Темно-зелений фон */
-            color: #32cd32; /* Кислотно-зелений текст (lime green) */
+            background: linear-gradient(135deg, #0a1f0a, #228b22); /* Градієнт зелених тонів */
+            color: #32cd32; /* Кислотно-зелений текст */
+            animation: backgroundPulse 5s infinite alternate;
+        }
+        @keyframes backgroundPulse {
+            0% { background-color: #0a1f0a; }
+            100% { background-color: #006400; }
         }
         .container {
             margin-top: 50px;
+            animation: fadeInContainer 1s ease-in-out;
+        }
+        @keyframes fadeInContainer {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .nav-tabs .nav-link {
             color: #32cd32;
             border-color: #006400;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .nav-tabs .nav-link:hover {
+            color: #ffffff;
+            transform: scale(1.1);
         }
         .nav-tabs .nav-link.active {
             background-color: #006400;
             border-color: #006400 #006400 #006400;
             color: #ffffff;
+            animation: tabActive 0.5s;
+        }
+        @keyframes tabActive {
+            0% { transform: scale(0.9); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
         }
         .tab-content {
             padding: 20px;
-            background-color: #006400; /* Темніший зелений для контенту */
+            background: linear-gradient(to bottom, #006400, #228b22);
             border: 1px solid #0a1f0a;
             border-top: none;
             border-radius: 0 0 8px 8px;
             box-shadow: 0 4px 8px rgba(0,255,0,0.2);
+            animation: contentGlow 2s infinite alternate;
+        }
+        @keyframes contentGlow {
+            0% { box-shadow: 0 4px 8px rgba(0,255,0,0.2); }
+            100% { box-shadow: 0 4px 12px rgba(0,255,0,0.5); }
         }
         .list-group-item {
-            background-color: #228b22; /* Зелений колір елементів списку */
+            background-color: #228b22;
             color: #32cd32;
             border-color: #0a1f0a;
-            transition: transform 0.3s ease, opacity 0.5s ease-in-out;
+            transition: transform 0.3s ease, opacity 0.5s ease-in-out, background-color 0.3s;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
         .list-group-item:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px) rotate(1deg);
             box-shadow: 0 2px 4px rgba(0,255,0,0.1);
+            background-color: #32cd32;
+            color: #0a1f0a;
         }
         .list-group-item.completed {
             text-decoration: line-through;
@@ -49,27 +76,38 @@
         }
         .fade-in {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(20px) scale(0.9);
+            animation: fadeInItem 0.5s forwards;
         }
-        .fade-in.active {
-            opacity: 1;
-            transform: translateY(0);
+        @keyframes fadeInItem {
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .img-thumbnail {
             max-width: 200px;
             margin: 10px;
             border: 2px solid #32cd32;
             border-radius: 8px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s;
+            animation: photoPop 0.5s;
+        }
+        @keyframes photoPop {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
         }
         .img-thumbnail:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(3deg);
             box-shadow: 0 4px 8px rgba(0,255,0,0.3);
+            filter: brightness(1.2);
         }
         .form-control {
             background-color: #228b22;
             color: #32cd32;
             border-color: #0a1f0a;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-control:focus {
+            border-color: #32cd32;
+            box-shadow: 0 0 8px rgba(50,205,50,0.5);
         }
         .form-control::placeholder {
             color: #90ee90;
@@ -77,63 +115,149 @@
         .btn-success {
             background-color: #32cd32;
             border-color: #32cd32;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.3s;
         }
         .btn-success:hover {
             background-color: #228b22;
+            transform: scale(1.05);
         }
         .btn-danger {
-            background-color: #ff4500; /* Червоний для видалення, щоб контрастував */
+            background-color: #ff4500;
             border-color: #ff4500;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .btn-danger:hover {
+            background-color: #cc3700;
+            transform: scale(1.05);
         }
         h1, h3 {
             color: #ffffff;
             text-shadow: 1px 1px 2px rgba(0,255,0,0.5);
+            animation: textGlow 1.5s infinite alternate;
+        }
+        @keyframes textGlow {
+            0% { text-shadow: 1px 1px 2px rgba(0,255,0,0.5); }
+            100% { text-shadow: 1px 1px 4px rgba(0,255,0,0.8); }
         }
         .task-time {
             font-size: 0.8em;
             color: #90ee90;
             margin-left: 10px;
         }
+        #photos-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            background-color: rgba(0,100,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: galleryFade 1s;
+        }
+        @keyframes galleryFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .photo-item {
+            position: relative;
+            margin: 10px;
+        }
+        .photo-delete {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255,69,0,0.8);
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+        .photo-item:hover .photo-delete {
+            opacity: 1;
+        }
+        #auth-form {
+            background: linear-gradient(to bottom, #006400, #228b22);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,255,0,0.3);
+            margin-bottom: 20px;
+            animation: authFade 1s;
+        }
+        @keyframes authFade {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .hidden {
+            display: none;
+        }
     </style>
+    <script src="https://unpkg.com/@octokit/rest@20.1.1/dist/octokit.rest.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-4">Завдання, Нотатки та Фото</h1>
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="tasks-tab" data-toggle="tab" href="#tasks" role="tab">Завдання</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab">Нотатки</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="photos-tab" data-toggle="tab" href="#photos" role="tab">Фото</a>
-            </li>
-        </ul>
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="tasks" role="tabpanel">
-                <h3>Завдання</h3>
-                <ul class="list-group" id="tasks-list"></ul>
-                <div class="form-group mt-3">
-                    <input type="text" class="form-control" id="new-task" placeholder="Нове завдання">
-                    <button class="btn btn-success mt-2" onclick="addTask()">Додати</button>
-                </div>
+        <div id="auth-form">
+            <h2 class="text-center">Підключення до GitHub (для редагування)</h2>
+            <p>Введіть дані для завантаження/видалення фото. Без цього можна тільки переглядати. Репозиторій повинен бути публічним для загального доступу до фото.</p>
+            <div class="form-group">
+                <label for="owner">Власник репозиторію (username):</label>
+                <input type="text" class="form-control" id="owner" placeholder="yourusername">
             </div>
-            <div class="tab-pane fade" id="notes" role="tabpanel">
-                <h3>Нотатки</h3>
-                <ul class="list-group" id="notes-list"></ul>
-                <div class="form-group mt-3">
-                    <input type="text" class="form-control" id="new-note" placeholder="Нова нотатка">
-                    <button class="btn btn-success mt-2" onclick="addNote()">Додати</button>
-                </div>
+            <div class="form-group">
+                <label for="repo">Назва репозиторію:</label>
+                <input type="text" class="form-control" id="repo" placeholder="your-repo-name">
             </div>
-            <div class="tab-pane fade" id="photos" role="tabpanel">
-                <h3>Фото</h3>
-                <div id="photos-gallery" class="d-flex flex-wrap"></div>
-                <div class="form-group mt-3">
-                    <input type="file" class="form-control-file" id="new-photo" accept="image/*">
-                    <button class="btn btn-success mt-2" onclick="addPhoto()">Завантажити</button>
+            <div class="form-group">
+                <label for="token">GitHub Personal Access Token (для запису):</label>
+                <input type="password" class="form-control" id="token" placeholder="ghp_...">
+            </div>
+            <div class="form-group">
+                <label for="branch">Гілка (за замовчуванням main):</label>
+                <input type="text" class="form-control" id="branch" value="main">
+            </div>
+            <button class="btn btn-success btn-block" onclick="connectToGitHub()">Підключитися</button>
+            <button class="btn btn-secondary btn-block mt-2" onclick="skipAuth()">Пропустити (тільки перегляд)</button>
+        </div>
+
+        <div id="main-content" class="hidden">
+            <h1 class="text-center mb-4">Завдання, Нотатки та Фото</h1>
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="tasks-tab" data-toggle="tab" href="#tasks" role="tab">Завдання</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="notes-tab" data-toggle="tab" href="#notes" role="tab">Нотатки</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="photos-tab" data-toggle="tab" href="#photos" role="tab">Фото</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="tasks" role="tabpanel">
+                    <h3>Завдання</h3>
+                    <ul class="list-group" id="tasks-list"></ul>
+                    <div class="form-group mt-3">
+                        <input type="text" class="form-control" id="new-task" placeholder="Нове завдання">
+                        <button class="btn btn-success mt-2" onclick="addTask()">Додати</button>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="notes" role="tabpanel">
+                    <h3>Нотатки</h3>
+                    <ul class="list-group" id="notes-list"></ul>
+                    <div class="form-group mt-3">
+                        <input type="text" class="form-control" id="new-note" placeholder="Нова нотатка">
+                        <button class="btn btn-success mt-2" onclick="addNote()">Додати</button>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="photos" role="tabpanel">
+                    <h3>Фото</h3>
+                    <div id="photos-gallery"></div>
+                    <div class="form-group mt-3" id="upload-form">
+                        <input type="file" class="form-control-file" id="new-photo" accept="image/*">
+                        <button class="btn btn-success mt-2" onclick="addPhoto()">Завантажити</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -143,14 +267,74 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        let owner, repo, token, branch, octokit;
         let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
-        let photos = JSON.parse(localStorage.getItem('photos')) || [];
+        let photos = [];
+        let isAuth = false;
 
-        function loadData() {
+        function connectToGitHub() {
+            owner = document.getElementById('owner').value;
+            repo = document.getElementById('repo').value;
+            token = document.getElementById('token').value;
+            branch = document.getElementById('branch').value;
+
+            if (!owner || !repo || !branch) {
+                alert('Заповніть обов\'язкові поля!');
+                return;
+            }
+
+            if (token) {
+                octokit = new Octokit({ auth: token });
+                isAuth = true;
+            } else {
+                isAuth = false;
+            }
+
+            document.getElementById('auth-form').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+
+            loadData();
+        }
+
+        function skipAuth() {
+            owner = prompt('Введіть власника репозиторію (username):');
+            repo = prompt('Введіть назву репозиторію:');
+            branch = prompt('Введіть гілку (за замовчуванням main):') || 'main';
+
+            if (!owner || !repo || !branch) {
+                alert('Заповніть поля!');
+                return;
+            }
+
+            isAuth = false;
+            document.getElementById('auth-form').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('upload-form').classList.add('hidden'); // Ховаємо форму завантаження без auth
+
+            loadData();
+        }
+
+        async function loadData() {
+            // Завдання та нотатки з localStorage
             displayTasks();
             displayNotes();
+
+            // Фото з GitHub
+            photos = await loadJson('data/photos.json') || { photos: [] };
+            photos = photos.photos || [];
             displayPhotos();
+        }
+
+        async function loadJson(path) {
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`);
+                if (!response.ok) throw new Error();
+                return await response.json();
+            } catch (e) {
+                console.log(`File ${path} not found, assuming empty.`);
+                return { photos: [] };
+            }
         }
 
         function formatTimeAgo(timestamp) {
@@ -197,7 +381,6 @@
                 li.appendChild(timeSpan);
                 li.appendChild(deleteBtn);
                 list.appendChild(li);
-                setTimeout(() => li.classList.add('active'), 10);
             });
         }
 
@@ -224,19 +407,30 @@
                 li.appendChild(timeSpan);
                 li.appendChild(deleteBtn);
                 list.appendChild(li);
-                setTimeout(() => li.classList.add('active'), 10);
             });
         }
 
         function displayPhotos() {
             const gallery = document.getElementById('photos-gallery');
             gallery.innerHTML = '';
-            photos.forEach(photoBase64 => {
+            gallery.classList.add('d-flex', 'flex-wrap');
+            photos.forEach((photo, index) => {
+                const div = document.createElement('div');
+                div.classList.add('photo-item');
+
                 const img = document.createElement('img');
-                img.src = photoBase64;
-                img.classList.add('img-thumbnail', 'fade-in');
-                gallery.appendChild(img);
-                setTimeout(() => img.classList.add('active'), 10);
+                img.src = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/images/${photo}`;
+                img.classList.add('img-thumbnail');
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('photo-delete');
+                deleteBtn.textContent = 'X';
+                deleteBtn.onclick = () => removePhoto(index);
+                if (!isAuth) deleteBtn.style.display = 'none'; // Ховаємо delete без auth
+
+                div.appendChild(img);
+                div.appendChild(deleteBtn);
+                gallery.appendChild(div);
             });
         }
 
@@ -280,7 +474,11 @@
             displayNotes();
         }
 
-        function addPhoto() {
+        async function addPhoto() {
+            if (!isAuth) {
+                alert('Потрібна авторизація для завантаження!');
+                return;
+            }
             const fileInput = document.getElementById('new-photo');
             const file = fileInput.files[0];
             if (!file) {
@@ -289,28 +487,96 @@
             }
 
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64 = e.target.result;
-                photos.push(base64);
-                localStorage.setItem('photos', JSON.stringify(photos));
+            reader.onload = async function(e) {
+                const base64 = e.target.result.split(',')[1];
+                const filename = Date.now() + '_' + file.name.replace(/\s/g, '_');
+                const path = 'images/' + filename;
 
-                const gallery = document.getElementById('photos-gallery');
-                const img = document.createElement('img');
-                img.src = base64;
-                img.classList.add('img-thumbnail', 'fade-in');
-                gallery.appendChild(img);
-                setTimeout(() => img.classList.add('active'), 10);
+                // Upload image
+                await uploadFile(path, base64, 'Upload new photo');
 
+                // Update photos.json
+                photos.push(filename);
+                await updateJson('data/photos.json', { photos });
+
+                displayPhotos();
                 fileInput.value = '';
-            };
-            reader.onerror = function() {
-                alert('Помилка читання файлу!');
             };
             reader.readAsDataURL(file);
         }
 
-        // Завантаження даних при старті
-        loadData();
+        async function removePhoto(index) {
+            if (!isAuth) {
+                alert('Потрібна авторизація для видалення!');
+                return;
+            }
+            const filename = photos[index];
+            const path = 'images/' + filename;
+
+            // Delete image
+            const sha = await getFileSha(path);
+            if (sha) {
+                await octokit.repos.deleteFile({
+                    owner,
+                    repo,
+                    path,
+                    message: 'Delete photo',
+                    sha,
+                    branch
+                });
+            }
+
+            // Update photos.json
+            photos.splice(index, 1);
+            await updateJson('data/photos.json', { photos });
+
+            displayPhotos();
+        }
+
+        async function updateJson(path, data) {
+            const newContent = JSON.stringify(data, null, 2);
+            const base64Content = btoa(unescape(encodeURIComponent(newContent)));
+            const sha = await getFileSha(path);
+            await octokit.repos.createOrUpdateFileContents({
+                owner,
+                repo,
+                path,
+                message: 'Update photos',
+                content: base64Content,
+                sha,
+                branch
+            });
+        }
+
+        async function uploadFile(path, base64Content, message) {
+            const sha = await getFileSha(path);
+            await octokit.repos.createOrUpdateFileContents({
+                owner,
+                repo,
+                path,
+                message,
+                content: base64Content,
+                sha,
+                branch
+            });
+        }
+
+        async function getFileSha(path) {
+            try {
+                const response = await octokit.repos.getContent({
+                    owner,
+                    repo,
+                    path,
+                    ref: branch
+                });
+                return response.data.sha;
+            } catch (e) {
+                if (e.status === 404) {
+                    return undefined;
+                }
+                throw e;
+            }
+        }
     </script>
 </body>
 </html>
